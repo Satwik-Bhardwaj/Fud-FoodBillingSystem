@@ -3,25 +3,32 @@ package com.company;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
-class CreateFrame{
-    JFrame window;
+import static com.company.BillPlotter.ItemOptions;
+
+class FoodSelect extends JPanel{
+//    JPanel foodSelectFrame;
     JPanel searchPanel;
     JPanel foodPanel;
     JTextField searchField;
     JButton searchNode;
     JScrollPane foodPanelScroll;
     DefaultMutableTreeNode SuperCategory;
-    DefaultMutableTreeNode category1;
     JTree jTree;
+    int i;
+    int j;
+    int k;
 
-    public CreateFrame(){
-        window = new JFrame();
+    DataFetcher dataFetcher;
+
+    public FoodSelect(){
 
         searchPanel = new JPanel();
         foodPanel = new JPanel();
@@ -31,16 +38,22 @@ class CreateFrame{
 
         foodPanelScroll = new JScrollPane(foodPanel);
 
-        SuperCategory = new DefaultMutableTreeNode("Dishes");
-        category1 = new DefaultMutableTreeNode("Pizza");
+        dataFetcher = new DataFetcher();
 
-        category1.add(new DefaultMutableTreeNode("OTC Pizza"));
-        category1.add(new DefaultMutableTreeNode("Cheez Pizza"));
-        category1.add(new DefaultMutableTreeNode("Salad Pizza"));
+        DataApplier dataApplier = new DataApplier();
+        SuperCategory = dataApplier.makeJTreeModel();
 
-        SuperCategory.add(category1);
         jTree = new JTree(SuperCategory);
-        jTree.setEditable(true);
+        jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        jTree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+                Float price = dataApplier.getFoodPrice(selectedNode.toString());
+                System.out.println(price);
+                ItemOptions(selectedNode.toString(), price);
+            }
+        });
 
         foodPanel.setLayout(new BorderLayout());
         foodPanel.add(jTree);
@@ -79,12 +92,12 @@ class CreateFrame{
         searchPanel.add(searchField);
         searchPanel.add(searchNode);
 
-        window.setLayout(new BoxLayout(window.getContentPane(), BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        window.add(searchPanel);
-        window.add(foodPanelScroll);
-        window.setSize(1280,720);
-        window.setVisible(true);
+        add(searchPanel);
+        add(foodPanelScroll);
+        setSize(1280,720);
+        setVisible(true);
     }
 
     private void searchHit() {
@@ -111,10 +124,5 @@ class CreateFrame{
             }
         }
         return null;
-    }
-}
-public class FoodSectionCreateFrame{
-    public static void main(String[] args) {
-        new CreateFrame();
     }
 }
