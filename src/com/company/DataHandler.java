@@ -11,13 +11,21 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.company.BillPlotter.ItemOptions;
+
 public class DataHandler {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        DataFetcher dataFetcher = new DataFetcher();
-        System.out.println(dataFetcher.billDate());
-        System.out.println(dataFetcher.billTime());
-        System.out.println(dataFetcher.billIdMaker());
-        System.out.println(dataFetcher.commentStatement());
+        BillItemList billItemList = new BillItemList();
+        billItemList.add("Aaloo tikki", 50);
+        billItemList.add("Chowmeen", 20);
+        billItemList.add("Chowmeen", 20);
+        for (int i = 0; i< billItemList.size(); i++){
+            System.out.println(billItemList.get(i).itemName);
+            System.out.println(billItemList.get(i).itemPrice);
+            System.out.println(billItemList.get(i).itemQuantity);
+            System.out.println(billItemList.get(i).serialNo);
+            System.out.println("-------------------------------------");
+        }
 
     }
 }
@@ -105,29 +113,27 @@ class DataApplier extends DataFetcher{
     }
 
     public DefaultMutableTreeNode makeJTreeModel() {
-            DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode("Dishes");
-            DefaultMutableTreeNode[] foodItem = new DefaultMutableTreeNode[100];
-            DefaultMutableTreeNode[] SubCategory = new DefaultMutableTreeNode[100];
-            DefaultMutableTreeNode[] Category = new DefaultMutableTreeNode[100];
+        DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode("Dishes");
+        DefaultMutableTreeNode[] foodItem = new DefaultMutableTreeNode[100];
+        DefaultMutableTreeNode[] SubCategory = new DefaultMutableTreeNode[100];
+        DefaultMutableTreeNode[] Category = new DefaultMutableTreeNode[100];
 
-            String subcatName;
-            String catName;
+        String subcatName;
+        String catName;
 
-            int i=0; int j=0; int k=0;
-            boolean SubCatExist=false;
-            boolean CatExist=false;
-            int tempIndexSub=-1;
-            int tempIndexCat=-1;
+        int i=0; int j=0; int k=0;
+        boolean SubCatExist=false;
+        boolean CatExist=false;
+        int tempIndexSub=-1;
+        int tempIndexCat=-1;
         try {
             ResultSet foodItemData = statement.executeQuery("select * from fooddata");
             while (foodItemData.next()){
                 foodItem[i] = new DefaultMutableTreeNode(filterBlank(foodItemData.getString("FoodItem")));
-                System.out.println("// "+foodItem[i].getUserObject());
                 subcatName = filterBlank(foodItemData.getString("SubCategory"));
 
                 // check for existence of subcategory node
                 for (int x=0; x<j; x++){
-                    System.out.println("--called");
                     if (SubCategory[x].getUserObject().toString().equals(subcatName)){
                         SubCatExist = true;
                         tempIndexSub=x;
@@ -137,7 +143,6 @@ class DataApplier extends DataFetcher{
                 if (!SubCatExist){
                     SubCategory[j] = new DefaultMutableTreeNode(subcatName);
                     SubCategory[j].add(foodItem[i]);
-                    System.out.println("//// "+SubCategory[j].getUserObject());
 
                     // for new node we have to check for its category node
                     catName = foodItemData.getString("Category");
@@ -151,7 +156,6 @@ class DataApplier extends DataFetcher{
                     if (!CatExist){
                         Category[k] = new DefaultMutableTreeNode(catName);
                         Category[k].add(SubCategory[j]);
-                        System.out.println("////// "+Category[k].getUserObject());
                         RootNode.add(Category[k]);
                         k++;
                     }else{
@@ -173,7 +177,7 @@ class DataApplier extends DataFetcher{
         } catch (SQLException e) {
             e.printStackTrace();
         }
-            return RootNode;
+        return RootNode;
     }
     public Float getFoodPrice(String foodItem){
         Float price=0f;
@@ -192,5 +196,55 @@ class DataApplier extends DataFetcher{
             return "Other";
         }
         return string;
+    }
+}
+// Bill Items List
+
+class BillItemList{
+
+    class AnItem{
+        int serialNo;
+        String itemName;
+        int itemQuantity;
+        float itemPrice;
+
+        AnItem(int serialNo, String itemName, int itemQuantity, float itemPrice){
+            this.serialNo = serialNo;
+            this.itemName = itemName;
+            this.itemQuantity = itemQuantity;
+            this.itemPrice = itemPrice;
+        }
+    }
+
+    private int index=0;
+
+    private ArrayList<AnItem> anItemArrayList = new ArrayList<>();
+    private AnItem tempItem;
+
+    // add function to add new item
+    public void add(String ItemName, float itemPrice){
+        for (int i=0; i < anItemArrayList.size(); i++){
+            tempItem = anItemArrayList.get(i);
+            if (ItemName.equals(anItemArrayList.get(i).itemName)) {
+                tempItem.itemQuantity++;
+                tempItem.itemPrice *= 2;
+                return;
+            }
+        }
+        anItemArrayList.add(new AnItem(index, ItemName, 1, itemPrice));
+
+        // displaying the item
+//        ItemOptions(ItemName, itemPrice, );
+        index++;
+    }
+
+    // get function to return an AnItem object
+    public AnItem get(int index){
+        return anItemArrayList.get(index);
+    }
+
+    // size function return size of the list of items in bill
+    public int size(){
+        return anItemArrayList.size();
     }
 }

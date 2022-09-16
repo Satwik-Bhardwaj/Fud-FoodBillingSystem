@@ -2,6 +2,11 @@ package com.company;
 
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.PanelUI;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,7 +38,29 @@ class FoodSelector {
         BillPlotter billPlotter = new BillPlotter();
 
         FoodAndBill = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        FoodAndBill.setUI(new BasicSplitPaneUI()
+        {
+            @Override
+            public BasicSplitPaneDivider createDefaultDivider()
+            {
+                return new BasicSplitPaneDivider(this)
+                {
+                    public void setBorder(Border b) {}
+
+                    @Override
+                    public void paint(Graphics g)
+                    {
+                        g.setColor(new Color(0x0FFFFFF, true));
+                        g.fillRect(0, 0, getSize().width, getSize().height);
+                        super.paint(g);
+                    }
+                };
+            }
+        });
+        FoodAndBill.setBorder(null);
         FoodAndBill.setDividerLocation(screenSize.width/2);
+        FoodAndBill.setDividerSize(3);
+        FoodAndBill.setContinuousLayout(true);
         FoodAndBill.setLeftComponent(foodSelect);
         FoodAndBill.setRightComponent(billPlotter);
 

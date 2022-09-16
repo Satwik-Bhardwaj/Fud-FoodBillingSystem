@@ -53,93 +53,11 @@ class BillPlotter extends JPanel{
 
         billItemPanel.setLayout(new BoxLayout(billItemPanel, BoxLayout.Y_AXIS));
 
-//        int value=10;
-//        JPanel[] itemPanel = new JPanel[value];
-//        JLabel[] itemName = new JLabel[value];
-//        JButton[] decreaseQuantity = new JButton[value];
-//        JTextField[] quantityField = new JTextField[value];
-//        JButton[] increaseQuantity = new JButton[value];
-//        JLabel[] itemPrice = new JLabel[value];
-//
-//        for (int x=0; x<value; x++){
-//            int i = x;
-//            itemPanel[i]=new JPanel(new GridLayout(1, 5, 5, 0 ));
-//            itemPanel[i].setBorder(new EmptyBorder(2,2,2,2));
-//
-//            itemName[i] = new JLabel("Item "+i);
-//            itemName[i].setHorizontalAlignment(SwingConstants.CENTER);
-//
-//            decreaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(getClass().getResource("img/minus.png"))));
-//            decreaseQuantity[i].addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    int quant = Integer.parseInt(quantityField[i].getText());
-//                    quantityField[i].setText(String.valueOf(quant-1));
-//
-//                    if (quant<=0){
-//                        billItemPanel.remove(itemName[i]);
-//                    }
-//                }
-//            });
-//            quantityField[i] = new JTextField("1");
-//            quantityField[i].setHorizontalAlignment(JTextField.CENTER);
-//
-//            increaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(getClass().getResource("img/plus.png"))));
-//            increaseQuantity[i].addActionListener(new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    int quant = Integer.parseInt(quantityField[i].getText());
-//                    quantityField[i].setText(String.valueOf(quant+1));
-//
-//                }
-//            });
-////            if (Integer.parseInt(quantityField[i].getText())<=0){
-////                billItemPanel.remove(quantityField[i]);
-////                continue;
-////            }
-//            itemPrice[i] = new JLabel("₹ 234.34");
-//            itemPrice[i].setHorizontalAlignment(SwingConstants.CENTER);
-//
-//            itemPanel[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-//
-//            itemPanel[i].addMouseListener(new MouseListener() {
-//                @Override
-//                public void mouseClicked(MouseEvent e) {
-//
-//                }
-//
-//                @Override
-//                public void mousePressed(MouseEvent e) {
-//
-//                }
-//
-//                @Override
-//                public void mouseReleased(MouseEvent e) {
-//
-//                }
-//
-//                @Override
-//                public void mouseEntered(MouseEvent e) {
-//                    itemPanel[i].setBackground(new Color(0xADADAD));
-//                }
-//
-//                @Override
-//                public void mouseExited(MouseEvent e) {
-//                    itemPanel[i].setBackground(null);
-//                }
-//            });
-//
-//            itemPanel[i].add(itemName[i]);
-//            itemPanel[i].add(decreaseQuantity[i]);
-//            itemPanel[i].add(quantityField[i]);
-//            itemPanel[i].add(increaseQuantity[i]);
-//            itemPanel[i].add(itemPrice[i]);
-//
-//            billItemPanel.add(itemPanel[i]);
-//        }
         billItem.getVerticalScrollBar().setUnitIncrement(16);
 
         billPanel.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        billPanel.setDividerSize(3);
+        billPanel.setContinuousLayout(true);
         billPanel.setTopComponent(billInfo);
         billPanel.setBottomComponent(billItem);
         billPanel.setDividerLocation(100);
@@ -159,6 +77,7 @@ class BillPlotter extends JPanel{
         setSize(1280, 720);
         setVisible(true);
     }
+
     static int itemCount=0;
     static int value=1000;
     static JPanel[] itemPanel = new JPanel[value];
@@ -169,81 +88,90 @@ class BillPlotter extends JPanel{
     static JLabel[] itemPrice = new JLabel[value];
 
     public static void ItemOptions(String ItemName, Float ProductPrice){
-            int i = itemCount;
-            itemPanel[i]=new JPanel(new GridLayout(1, 5, 5, 0 ));
-            itemPanel[i].setBorder(new EmptyBorder(2,2,2,2));
+        int i = itemCount;
+        itemPanel[i]=new JPanel(new GridLayout(1, 5, 5, 0 ));
+        itemPanel[i].setBorder(new EmptyBorder(2,2,2,2));
 
-            itemName[i] = new JLabel(ItemName);
-            itemName[i].setHorizontalAlignment(SwingConstants.CENTER);
+        itemName[i] = new JLabel(ItemName);
+        itemName[i].setHorizontalAlignment(SwingConstants.CENTER);
 
-            decreaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(BillPlotter.class.getResource("img/minus.png"))));
-            decreaseQuantity[i].addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int quant = Integer.parseInt(quantityField[i].getText());
-                    quantityField[i].setText(String.valueOf(quant-1));
-
-                    if (quant<=0){
-                        billItemPanel.remove(itemName[i]);
-                    }
+        decreaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(BillPlotter.class.getResource("img/minus.png"))));
+        decreaseQuantity[i].setOpaque(false);
+        decreaseQuantity[i].setContentAreaFilled(false);
+        decreaseQuantity[i].setBorderPainted(false);
+        decreaseQuantity[i].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int quant = Integer.parseInt(quantityField[i].getText());
+                float newProductPrice = ProductPrice*(quant-1);
+                quantityField[i].setText(String.valueOf(quant-1));;
+                itemPrice[i].setText("₹ "+newProductPrice);
+                if (Integer.parseInt(quantityField[i].getText())<=0){
+                    itemRemoval(i);
                 }
-            });
-            quantityField[i] = new JTextField("1");
-            quantityField[i].setHorizontalAlignment(JTextField.CENTER);
+            }
+        });
 
-            increaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(BillPlotter.class.getResource("img/plus.png"))));
-            increaseQuantity[i].addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int quant = Integer.parseInt(quantityField[i].getText());
-                    quantityField[i].setText(String.valueOf(quant+1));
+        quantityField[i] = new JTextField("1");
+        quantityField[i].setHorizontalAlignment(JTextField.CENTER);
 
-                }
-            });
-//            if (Integer.parseInt(quantityField[i].getText())<=0){
-//                billItemPanel.remove(quantityField[i]);
-//                continue;
-//            }
-            itemPrice[i] = new JLabel("₹ "+ProductPrice);
-            itemPrice[i].setHorizontalAlignment(SwingConstants.CENTER);
+        increaseQuantity[i] = new JButton(new ImageIcon(Objects.requireNonNull(BillPlotter.class.getResource("img/plus.png"))));
+        increaseQuantity[i].setOpaque(false);
+        increaseQuantity[i].setContentAreaFilled(false);
+        increaseQuantity[i].setBorderPainted(false);
+        increaseQuantity[i].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int quant = Integer.parseInt(quantityField[i].getText());
+                float newProductPrice = ProductPrice*(quant+1);
+                quantityField[i].setText(String.valueOf(quant+1));
+                itemPrice[i].setText("₹ "+newProductPrice);
+            }
+        });
+        itemPrice[i] = new JLabel("₹ "+ProductPrice);
+        itemPrice[i].setHorizontalAlignment(SwingConstants.CENTER);
 
-            itemPanel[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        itemPanel[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        itemPanel[i].addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
 
-            itemPanel[i].addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
+            }
 
-                }
+            @Override
+            public void mousePressed(MouseEvent e) {
 
-                @Override
-                public void mousePressed(MouseEvent e) {
+            }
 
-                }
+            @Override
+            public void mouseReleased(MouseEvent e) {
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
+            }
 
-                }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                itemPanel[i].setBackground(new Color(0xADADAD));
+            }
 
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    itemPanel[i].setBackground(new Color(0xADADAD));
-                }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                itemPanel[i].setBackground(null);
+            }
+        });
 
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    itemPanel[i].setBackground(null);
-                }
-            });
+        itemPanel[i].add(itemName[i]);
+        itemPanel[i].add(decreaseQuantity[i]);
+        itemPanel[i].add(quantityField[i]);
+        itemPanel[i].add(increaseQuantity[i]);
+        itemPanel[i].add(itemPrice[i]);
 
-            itemPanel[i].add(itemName[i]);
-            itemPanel[i].add(decreaseQuantity[i]);
-            itemPanel[i].add(quantityField[i]);
-            itemPanel[i].add(increaseQuantity[i]);
-            itemPanel[i].add(itemPrice[i]);
+        billItemPanel.add(itemPanel[i]);
+        billItemPanel.revalidate();
+        itemCount++;
+    }
 
-            billItemPanel.add(itemPanel[i]);
-            billItemPanel.revalidate();
-            itemCount++;
+    private static void itemRemoval(int index){
+        billItemPanel.remove(itemPanel[index]);
+        billItemPanel.updateUI();
     }
 }
