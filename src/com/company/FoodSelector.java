@@ -1,24 +1,27 @@
 package com.company;
 
-
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.PanelUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static com.company.BillPlotter.*;
+
 class FoodSelector {
-    JFrame jFrame = new JFrame();
+    static JFrame jFrame;
     GridLayout mainFrameLay;
     JMenuBar navBar;
     JMenu FileComp;
     JMenuItem ThemeOpt;
     JSplitPane FoodAndBill;
     JMenuItem Settings;
+    FoodSelect foodSelect;
+
+    static BillPlotter billPlotter;
+
     FoodSelector(){
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         jFrame = new JFrame();
@@ -34,8 +37,8 @@ class FoodSelector {
                 jFrame.getContentPane().setBackground(new Color(0x262626));
             }
         });
-        FoodSelect foodSelect = new FoodSelect();
-        BillPlotter billPlotter = new BillPlotter();
+        foodSelect = new FoodSelect();
+        billPlotter = new BillPlotter();
 
         FoodAndBill = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         FoodAndBill.setUI(new BasicSplitPaneUI()
@@ -64,8 +67,6 @@ class FoodSelector {
         FoodAndBill.setLeftComponent(foodSelect);
         FoodAndBill.setRightComponent(billPlotter);
 
-
-
         FileComp.add(ThemeOpt);
         FileComp.add(Settings);
         navBar.add(FileComp);
@@ -77,14 +78,19 @@ class FoodSelector {
         Toolkit t=Toolkit.getDefaultToolkit();
         Image image = t.getImage(getClass().getResource("appIcon/Fud-Icon.png"));
         jFrame.setIconImage(image);
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
         jFrame.setTitle("Food Selection - Food Billing System");
         jFrame.setSize(screenSize.width, screenSize.height);
         jFrame.setVisible(true);
+    }
+
+    public static void refreshBillPanel(){
+        resetAll();
+        new FoodSelector();
+        System.out.println("called");
+    }
+
+    private static void resetAll() {
+        allItemCount = 0;
     }
 
     public static void main(String[] args) {

@@ -2,9 +2,7 @@ package com.company;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 
-import javax.swing.text.DateFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.xml.crypto.Data;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,22 +11,22 @@ import java.util.*;
 
 import static com.company.BillPlotter.ItemOptions;
 
-public class DataHandler {
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        BillItemList billItemList = new BillItemList();
-        billItemList.add("Aaloo tikki", 50);
-        billItemList.add("Chowmeen", 20);
-        billItemList.add("Chowmeen", 20);
-        for (int i = 0; i< billItemList.size(); i++){
-            System.out.println(billItemList.get(i).itemName);
-            System.out.println(billItemList.get(i).itemPrice);
-            System.out.println(billItemList.get(i).itemQuantity);
-            System.out.println(billItemList.get(i).serialNo);
-            System.out.println("-------------------------------------");
-        }
-
-    }
-}
+//public class DataHandler {
+//    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+//        BillItemList billItemList = new BillItemList();
+//        billItemList.add("Aaloo tikki", 50);
+//        billItemList.add("Chowmeen", 20);
+//        billItemList.add("Chowmeen", 20);
+//        for (int i = 0; i< billItemList.size(); i++){
+//            System.out.println(billItemList.get(i).itemName);
+//            System.out.println(billItemList.get(i).itemPrice);
+//            System.out.println(billItemList.get(i).itemQuantity);
+//            System.out.println(billItemList.get(i).serialNo);
+//            System.out.println("-------------------------------------");
+//        }
+//
+//    }
+//}
 
 class DataFetcher{
     static int billCount;
@@ -93,10 +91,6 @@ class DataFetcher{
 }
 class DataApplier extends DataFetcher{
 
-    DataApplier(){
-
-    }
-
     // Bill Identification Details
     String cashierName;
     String billId;
@@ -104,12 +98,36 @@ class DataApplier extends DataFetcher{
     String billTime;
     String comment;
 
+    DataApplier(){
+        try {
+            billInfo();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     void billInfo() throws SQLException {
         cashierName = getUser();
         billId = billIdMaker();
         billDate = billDate();
         billTime = billTime();
         comment = commentStatement();
+    }
+    public String getCashierName(){
+        return cashierName;
+    }
+    public String getBillId(){
+        return billId;
+    }
+    public String getBillDate(){
+        return billDate;
+    }
+    public String getBillTime(){
+        return billTime;
+    }
+    String getComment(){
+        return comment;
     }
 
     public DefaultMutableTreeNode makeJTreeModel() {

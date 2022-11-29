@@ -15,19 +15,17 @@ import static com.company.BillPlotter.ItemOptions;
 
 class FoodSelect extends JPanel{
     //    JPanel foodSelectFrame;
-    JPanel searchPanel;
-    JPanel foodPanel;
-    JTextField searchField;
-    JButton searchNode;
-    JScrollPane foodPanelScroll;
-    DefaultMutableTreeNode SuperCategory;
+    static JPanel searchPanel;
+    static JPanel foodPanel;
+    static JTextField searchField;
+    static JButton searchNode;
+    static JScrollPane foodPanelScroll;
+    static DefaultMutableTreeNode SuperCategory;
+    static DefaultTreeModel foodTreeModel;
     static JTree jTree;
-    int i;
-    int j;
-    int k;
 
-    DataFetcher dataFetcher;
-
+    static DataFetcher dataFetcher;
+    static DataApplier dataApplier = new DataApplier();
     public FoodSelect(){
 
         searchPanel = new JPanel();
@@ -40,10 +38,10 @@ class FoodSelect extends JPanel{
 
         dataFetcher = new DataFetcher();
 
-        DataApplier dataApplier = new DataApplier();
-        SuperCategory = dataApplier.makeJTreeModel();
 
-        jTree = new JTree(SuperCategory);
+        SuperCategory = dataApplier.makeJTreeModel();
+        foodTreeModel = new DefaultTreeModel(SuperCategory);
+        jTree = new JTree(foodTreeModel);
         jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         jTree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
@@ -51,10 +49,9 @@ class FoodSelect extends JPanel{
                 // getting a selected node
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
 
-                // if selected node is last then only we add the item
+                // if selected node is last, then only we add the item
                 if(SuperCategory.getDepth()==selectedNode.getLevel()){
                     Float price = dataApplier.getFoodPrice(selectedNode.toString());
-                    // PutItemInside(selectedNode);
                     ItemOptions(selectedNode.toString(), price);
                 }
             }
@@ -102,15 +99,6 @@ class FoodSelect extends JPanel{
         add(searchPanel);
         add(foodPanelScroll);
 
-        // setting UX of this panel
-//        searchPanel.setBackground(new Color(0x2B2B2B));
-//        searchField.setBackground(new Color(0x2B2B2B));
-//        searchField.setForeground(new Color(0xAEB0B2));
-//        searchField.setBorder(null);
-//        searchNode.setBackground(new Color(0x003D98));
-//        searchNode.setForeground(new Color(0xFFFFFF));
-
-
         setSize(1280,720);
         setVisible(true);
     }
@@ -120,18 +108,48 @@ class FoodSelect extends JPanel{
         String key = searchField.getText().toString();
         if(searchNode(SuperCategory, key)!=null){
             jTree= new JTree(searchNode(SuperCategory, key));
+            // changes here
+            jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+            jTree.addTreeSelectionListener(new TreeSelectionListener() {
+                @Override
+                public void valueChanged(TreeSelectionEvent e) {
+                    // getting a selected node
+                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+
+                    // if selected node is last, then only we add the item
+                    if(SuperCategory.getDepth()==selectedNode.getLevel()){
+                        Float price = dataApplier.getFoodPrice(selectedNode.toString());
+                        ItemOptions(selectedNode.toString(), price);
+                    }
+                }
+            });
+            // to here
             foodPanel.add(jTree);
             foodPanel.updateUI();
 
         } else if(searchNode(SuperCategory, key)==null){
             jTree= new JTree(SuperCategory);
+            jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+            jTree.addTreeSelectionListener(new TreeSelectionListener() {
+                @Override
+                public void valueChanged(TreeSelectionEvent e) {
+                    // getting a selected node
+                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+
+                    // if selected node is last, then only we add the item
+                    if(SuperCategory.getDepth()==selectedNode.getLevel()){
+                        Float price = dataApplier.getFoodPrice(selectedNode.toString());
+                        ItemOptions(selectedNode.toString(), price);
+                    }
+                }
+            });
             foodPanel.add(jTree);
             foodPanel.updateUI();
         }
     }
+
     // This function is need to check ---------------
     private TreePath find(DefaultMutableTreeNode root, String s) {
-        @SuppressWarnings("unchecked")
         Enumeration<TreeNode> e = root.depthFirstEnumeration();
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
@@ -144,7 +162,7 @@ class FoodSelect extends JPanel{
 
     // function finds the node which matches string(name)
     public DefaultMutableTreeNode searchNode(DefaultMutableTreeNode m_rootNode, String nodeStr) {
-        DefaultMutableTreeNode node = null;
+        DefaultMutableTreeNode node;
         Enumeration e = m_rootNode.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
             node = (DefaultMutableTreeNode) e.nextElement();

@@ -7,23 +7,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Objects;
 
+import static com.company.FoodSelector.refreshBillPanel;
+
 class BillPlotter extends JPanel{
+    static int allItemCount;
+
     JPanel outerBillPanel;
     JSplitPane billPanel;
     JScrollPane billInfo;
-    JPanel billInfoPanel;
+    static JPanel billInfoPanel;
     JScrollPane billItem;
     static JPanel billItemPanel;
     JPanel printPanel;
     JButton printButton;
+    JButton newBillButton;
 
     // bill Info elements
     JLabel cashierName;
     JLabel billId;
     JLabel billDate;
-    JLabel itemCountLabel;
+    JLabel billTime;
+    static JLabel itemCountLabel;
     JLabel billComment;
 
     BillPlotter(){
@@ -35,12 +42,17 @@ class BillPlotter extends JPanel{
         outerBillPanel = new JPanel();
         printPanel = new JPanel();
         printButton = new JButton("Print Bill");
+        newBillButton = new JButton("New Bill");
 
-        cashierName = new JLabel("CASHIER NAME: Raghav Sen");
-        billId = new JLabel("BILL ID: 2344");
-        billDate = new JLabel("DATE: 04/04/2022");
-        itemCountLabel = new JLabel("Items: 05");
-        billComment = new JLabel("Comment: This is the bill of Raghav Restaurant. Thank you for visiting here.");
+        // using dataApplier class to apply the bill information
+        DataApplier dataApplier = new DataApplier();
+
+        cashierName = new JLabel("CASHIER NAME: " + dataApplier.getCashierName());
+        billId = new JLabel("BILL ID: " + dataApplier.getBillId());
+        billDate = new JLabel("DATE: " + dataApplier.getBillDate());
+        billTime = new JLabel("TIME: " + dataApplier.getBillTime());
+        itemCountLabel = new JLabel("Items: "+ allItemCount);
+        billComment = new JLabel("Comment: " + dataApplier.getComment());
 
 
         billInfoPanel.setLayout(new BoxLayout(billInfoPanel, BoxLayout.Y_AXIS));
@@ -48,6 +60,7 @@ class BillPlotter extends JPanel{
         billInfoPanel.add(cashierName);
         billInfoPanel.add(billId);
         billInfoPanel.add(billDate);
+        billInfoPanel.add(billTime);
         billInfoPanel.add(itemCountLabel);
         billInfoPanel.add(billComment);
 
@@ -65,9 +78,25 @@ class BillPlotter extends JPanel{
         outerBillPanel.setLayout(new BorderLayout());
         outerBillPanel.add(billPanel);
 
+        // new Bill button actions
+        newBillButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshBillPanel();
+            }
+        });
+
+        // print button actions
+        printButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BillMaker billMaker = new BillMaker();
+            }
+        });
         printPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
         printPanel.add(outerBillPanel);
+        printPanel.add(newBillButton);
         printPanel.add(printButton);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -78,6 +107,7 @@ class BillPlotter extends JPanel{
         setVisible(true);
     }
 
+//    Bill items organizing variables and functions
     static int itemCount=0;
     static int value=1000;
     static JPanel[] itemPanel = new JPanel[value];
@@ -86,8 +116,10 @@ class BillPlotter extends JPanel{
     static JTextField[] quantityField = new JTextField[value];
     static JButton[] increaseQuantity = new JButton[value];
     static JLabel[] itemPrice = new JLabel[value];
-
     public static void ItemOptions(String ItemName, Float ProductPrice){
+        allItemCount++;
+        itemCountLabel.setText("Items: "+ allItemCount);
+        billInfoPanel.updateUI();
         int i = itemCount;
         itemPanel[i]=new JPanel(new GridLayout(1, 5, 5, 0 ));
         itemPanel[i].setBorder(new EmptyBorder(2,2,2,2));
@@ -102,9 +134,13 @@ class BillPlotter extends JPanel{
         decreaseQuantity[i].addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                allItemCount--;
+                itemCountLabel.setText("Items: "+ allItemCount);
+                billInfoPanel.updateUI();
+
                 int quant = Integer.parseInt(quantityField[i].getText());
                 float newProductPrice = ProductPrice*(quant-1);
-                quantityField[i].setText(String.valueOf(quant-1));;
+                quantityField[i].setText(String.valueOf(quant-1));
                 itemPrice[i].setText("₹ "+newProductPrice);
                 if (Integer.parseInt(quantityField[i].getText())<=0){
                     itemRemoval(i);
@@ -122,6 +158,9 @@ class BillPlotter extends JPanel{
         increaseQuantity[i].addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                allItemCount++;
+                itemCountLabel.setText("Items: "+ allItemCount);
+                billInfoPanel.updateUI();
                 int quant = Integer.parseInt(quantityField[i].getText());
                 float newProductPrice = ProductPrice*(quant+1);
                 quantityField[i].setText(String.valueOf(quant+1));
@@ -173,5 +212,44 @@ class BillPlotter extends JPanel{
     private static void itemRemoval(int index){
         billItemPanel.remove(itemPanel[index]);
         billItemPanel.updateUI();
+    }
+}
+
+class BillMaker{
+    int itemsCount;
+    ArrayList<Item> itemList;
+
+    BillMaker(){
+        itemsCount = BillPlotter.itemCount;
+        itemList = new ArrayList<>();
+
+        for(int i=0; i<itemsCount; i++){
+            itemList.add(new Item(Float.parseFloat(BillPlotter.itemPrice[i].getText().replaceAll("[₹ ]*", "")), BillPlotter.itemName[i].getText(), Integer.parseInt(BillPlotter.quantityField[i].getText())));
+        }
+
+        printBill();
+    }
+
+    private void printBill() {
+        System.out.println("\tItem Name \tQuantity \tPrice \tTotalPrice");
+        Item temp;
+        for(int i=0; i<itemList.size(); i++){
+            temp = itemList.get(i);
+            System.out.println("\t"+ temp.itemName +" \t"+ temp.quantity +" \t"+ temp.singlePrice +" \t"+temp.totalPrice);
+        }
+    }
+
+}
+class Item{
+    float singlePrice;
+    float totalPrice;
+    String itemName;
+    int quantity;
+
+    Item(float price, String itemName, int quantity){
+        this.quantity = quantity;
+        this.singlePrice = price / quantity;
+        this.itemName = itemName;
+        this.totalPrice = price;
     }
 }
