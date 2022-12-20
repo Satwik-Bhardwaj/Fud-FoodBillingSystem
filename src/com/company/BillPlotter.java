@@ -232,11 +232,13 @@ class BillMaker{
 
     private void printBill() {
         System.out.println("\tItem Name \tQuantity \tPrice \tTotalPrice");
+        System.out.println("---------------------------------------------------------------------------------------");
         Item temp;
         for(int i=0; i<itemList.size(); i++){
             temp = itemList.get(i);
             System.out.println("\t"+ temp.itemName +" \t"+ temp.quantity +" \t"+ temp.singlePrice +" \t"+temp.totalPrice);
         }
+        System.out.println("---------------------------------------------------------------------------------------");
     }
 
 }
